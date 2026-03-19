@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Membership System — Roles & Access Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#080808;--bg1:#111;--bg2:#181818;--bg3:#222;--bg4:#2a2a2a;
+  --line:rgba(255,255,255,0.07);--line2:rgba(255,255,255,0.13);
+  --txt:#f0ede8;--txt2:#a8a49e;--txt3:#6a6660;--txt4:#3a3733;
+  --sa:#7b70d8;--sa-f:rgba(123,112,216,0.13);--sa-l:rgba(123,112,216,0.35);--sa-t:#c4bfff;
+  --ad:#3a82c8;--ad-f:rgba(58,130,200,0.13);--ad-l:rgba(58,130,200,0.35);--ad-t:#93c5fd;
+  --of:#1a9e68;--of-f:rgba(26,158,104,0.13);--of-l:rgba(26,158,104,0.35);--of-t:#6ee7b7;
+  --vi:#888480;--vi-f:rgba(136,132,128,0.10);--vi-l:rgba(136,132,128,0.28);--vi-t:#c4c0ba;
+  --yes-b:rgba(26,158,104,0.15);--yes-t:#6ee7b7;
+  --no-b:rgba(220,80,60,0.14);--no-t:#fca5a5;
+  --lim-b:rgba(215,150,40,0.14);--lim-t:#fcd34d;
+  --star-b:rgba(123,112,216,0.18);--star-t:#c4bfff;
+  --fd:'DM Serif Display',Georgia,serif;
+  --fb:'Instrument Sans',sans-serif;
+  --fm:'DM Mono',monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:var(--bg);color:var(--txt);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideR{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scan{from{transform:translateY(-100%)}to{transform:translateY(120vh)}}
+@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes lineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes popIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .65s var(--ease),transform .65s var(--ease);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+
+/* HEADER */
+.hdr{background:var(--bg);padding:80px 48px 72px;position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+.hdr-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 59px,var(--line) 59px,var(--line) 60px),repeating-linear-gradient(90deg,transparent,transparent 59px,var(--line) 59px,var(--line) 60px);pointer-events:none;}
+.hdr-scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(123,112,216,.7),rgba(26,158,104,.5),transparent);animation:scan 5s linear infinite;pointer-events:none;}
+.hdr-glow{position:absolute;width:700px;height:500px;border-radius:50%;background:radial-gradient(ellipse,rgba(123,112,216,.08) 0%,transparent 70%);top:-150px;left:-150px;pointer-events:none;animation:pulse 8s ease-in-out infinite;}
+.hdr-inner{position:relative;max-width:960px;margin:0 auto;}
+.hdr-eye{font-family:var(--fm);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--sa);margin-bottom:20px;display:flex;align-items:center;gap:8px;animation:slideR .8s var(--ease) .2s both;}
+.hdr-eye::before{content:'';width:24px;height:1px;background:var(--sa);}
+.hdr-title{font-family:var(--fd);font-size:clamp(38px,6vw,64px);line-height:1.05;color:var(--txt);margin-bottom:14px;animation:fadeUp .9s var(--ease) .3s both;}
+.hdr-title em{font-style:italic;color:var(--sa);}
+.hdr-sub{font-size:15px;color:var(--txt2);max-width:500px;animation:fadeUp .9s var(--ease) .45s both;}
+.hdr-meta{display:flex;gap:32px;margin-top:40px;flex-wrap:wrap;animation:fadeUp .9s var(--ease) .6s both;}
+.hdr-meta-item{}.hdr-meta-lbl{font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:4px;}
+.hdr-meta-val{font-size:20px;font-weight:500;color:var(--txt);font-family:var(--fd);}
+.cursor{display:inline-block;width:2px;height:.85em;background:var(--sa);margin-left:2px;vertical-align:text-bottom;animation:blink 1s step-end infinite;}
+
+/* NAV */
+.nav{position:sticky;top:0;background:rgba(8,8,8,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);z-index:100;padding:0 48px;}
+.nav-inner{max-width:960px;margin:0 auto;display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-a{font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);text-decoration:none;padding:16px 18px 14px;border-bottom:2px solid transparent;white-space:nowrap;transition:color .2s,border-color .2s;}
+.nav-a:hover{color:var(--txt2);}
+.nav-a.on{color:var(--sa-t);border-bottom-color:var(--sa);}
+
+/* LAYOUT */
+.main{max-width:960px;margin:0 auto;padding:0 48px 100px;}
+section{padding-top:80px;}
+.sh{display:flex;align-items:baseline;gap:16px;margin-bottom:36px;padding-bottom:18px;border-bottom:1px solid var(--line);position:relative;}
+.sh::after{content:'';position:absolute;bottom:-1px;left:0;width:60px;height:1px;background:var(--sa);transform-origin:left;animation:lineGrow .5s var(--ease) both;}
+.sn{font-family:var(--fm);font-size:10px;color:var(--sa);letter-spacing:.12em;min-width:28px;}
+.st{font-family:var(--fd);font-size:28px;color:var(--txt);line-height:1.2;}
+
+/* ROLE CARDS */
+.rg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+@media(max-width:720px){.rg{grid-template-columns:repeat(2,1fr);}}
+.rc{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:22px 18px 18px;cursor:pointer;transition:border-color .2s,background .2s,transform .2s var(--ease),box-shadow .2s;position:relative;overflow:hidden;}
+.rc::before{content:'';position:absolute;inset:0;border-radius:14px;opacity:0;transition:opacity .3s;}
+.rc:hover{transform:translateY(-3px);}
+.rc:hover::before{opacity:1;}
+.rc.sa::before{background:var(--sa-f);}.rc.ad::before{background:var(--ad-f);}
+.rc.of::before{background:var(--of-f);}.rc.vi::before{background:var(--vi-f);}
+.rc.sel{transform:translateY(-4px);}
+.rc.sa.sel{border-color:var(--sa-l);background:var(--sa-f);box-shadow:0 0 36px rgba(123,112,216,.22);}
+.rc.ad.sel{border-color:var(--ad-l);background:var(--ad-f);box-shadow:0 0 36px rgba(58,130,200,.22);}
+.rc.of.sel{border-color:var(--of-l);background:var(--of-f);box-shadow:0 0 36px rgba(26,158,104,.22);}
+.rc.vi.sel{border-color:var(--vi-l);background:var(--vi-f);box-shadow:0 0 28px rgba(136,132,128,.18);}
+.rc-inner{position:relative;z-index:1;}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:100px;font-family:var(--fm);font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;border:1px solid;}
+.b-sa{background:rgba(123,112,216,.15);color:var(--sa-t);border-color:var(--sa-l);}
+.b-ad{background:rgba(58,130,200,.15);color:var(--ad-t);border-color:var(--ad-l);}
+.b-of{background:rgba(26,158,104,.15);color:var(--of-t);border-color:var(--of-l);}
+.b-vi{background:rgba(136,132,128,.1);color:var(--vi-t);border-color:var(--vi-l);}
+.bdot{width:5px;height:5px;border-radius:50%;animation:pulse 2s ease-in-out infinite;}
+.b-sa .bdot{background:var(--sa);}.b-ad .bdot{background:var(--ad);}
+.b-of .bdot{background:var(--of);}.b-vi .bdot{background:var(--vi);}
+.rname{font-family:var(--fd);font-size:19px;color:var(--txt);margin-bottom:6px;}
+.rtag{font-size:12px;color:var(--txt2);line-height:1.5;}
+.rpill{position:absolute;top:14px;right:14px;font-family:var(--fm);font-size:10px;color:var(--txt3);background:var(--bg3);border:1px solid var(--line);border-radius:100px;padding:2px 8px;}
+
+/* DETAIL */
+.dp{background:var(--bg1);border:1px solid var(--line2);border-radius:16px;padding:28px;margin-bottom:56px;min-height:200px;}
+.dh{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--line);}
+.di{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:22px;font-style:italic;flex-shrink:0;}
+.i-sa{background:rgba(123,112,216,.2);color:var(--sa-t);border:1px solid var(--sa-l);}
+.i-ad{background:rgba(58,130,200,.2);color:var(--ad-t);border:1px solid var(--ad-l);}
+.i-of{background:rgba(26,158,104,.2);color:var(--of-t);border:1px solid var(--of-l);}
+.i-vi{background:rgba(136,132,128,.15);color:var(--vi-t);border:1px solid var(--vi-l);}
+.dn{font-family:var(--fd);font-size:22px;color:var(--txt);}
+.dd{font-size:13px;color:var(--txt2);margin-top:3px;}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:600px){.pg{grid-template-columns:repeat(2,1fr);}}
+.pc{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;transition:border-color .2s;}
+.pc:hover{border-color:var(--line2);}
+.pl{font-family:var(--fm);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px;}
+.pv{font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pv.yes{color:var(--yes-t);}.pv.yes .pdot{background:var(--of);box-shadow:0 0 6px var(--of);}
+.pv.no{color:var(--no-t);}.pv.no .pdot{background:#dc5040;box-shadow:0 0 6px rgba(220,80,60,.5);}
+.pv.lim{color:var(--lim-t);}.pv.lim .pdot{background:#d7962a;box-shadow:0 0 6px rgba(215,150,40,.5);}
+.dnote{margin-top:18px;padding:13px 16px;border-radius:8px;font-size:13px;line-height:1.65;color:var(--txt2);background:var(--bg3);border-left:3px solid;}
+.ni{border-color:var(--ad);}.nw{border-color:#d7962a;}
+
+/* TABLE */
+.tw{overflow-x:auto;margin-bottom:32px;border-radius:12px;border:1px solid var(--line);}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+thead tr{background:var(--bg2);}
+th{font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);padding:12px 16px;text-align:left;border-bottom:1px solid var(--line);}
+th.c{text-align:center;}
+td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle;transition:background .15s;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.tl{font-weight:500;color:var(--txt);font-size:14px;}
+.ts2{font-size:11px;color:var(--txt3);font-family:var(--fm);margin-top:2px;}
+.tc{text-align:center;}
+.tick{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:600;transition:transform .15s;}
+tr:hover .tick{transform:scale(1.12);}
+.ty{background:rgba(26,158,104,.2);color:var(--yes-t);border:1px solid rgba(26,158,104,.3);}
+.tn{background:rgba(220,80,60,.2);color:var(--no-t);border:1px solid rgba(220,80,60,.3);}
+.tr2{background:rgba(123,112,216,.2);color:var(--sa-t);border:1px solid rgba(123,112,216,.3);}
+
+/* FLOW */
+.ft{display:flex;overflow-x:auto;margin-bottom:28px;padding-bottom:4px;}
+.fn2{flex:1;min-width:120px;background:var(--bg2);border:1px solid var(--line);padding:18px 16px;position:relative;transition:background .2s;}
+.fn2:first-child{border-radius:10px 0 0 10px;}.fn2:last-child{border-radius:0 10px 10px 0;}
+.fn2+.fn2{border-left:none;}
+.fn2:hover{background:var(--bg3);}
+.fnum{font-family:var(--fm);font-size:9px;color:var(--sa);letter-spacing:.1em;margin-bottom:7px;}
+.ftitle{font-weight:500;font-size:13px;color:var(--txt);margin-bottom:4px;}
+.fsub{font-size:11px;color:var(--txt3);line-height:1.5;font-family:var(--fm);}
+.farr{position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:20px;height:20px;background:var(--bg3);border:1px solid var(--line);border-left:none;border-bottom:none;rotate:45deg;z-index:2;}
+.fn2:last-child .farr{display:none;}
+
+/* TECH GRID */
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+@media(max-width:600px){.tg{grid-template-columns:1fr;}}
+.tc2{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:20px;transition:border-color .2s,transform .2s var(--ease);}
+.tc2:hover{border-color:var(--line2);transform:translateY(-2px);}
+.tct{font-family:var(--fm);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--sa);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line);}
+.tli{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.tli li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--txt2);line-height:1.5;}
+.tli li::before{content:'→';font-family:var(--fm);font-size:10px;color:var(--txt3);flex-shrink:0;margin-top:2px;}
+code{font-family:var(--fm);font-size:11px;background:var(--bg3);padding:1px 6px;border-radius:4px;color:var(--sa-t);border:1px solid var(--line);}
+
+/* CODE BLOCKS */
+.cb{background:var(--bg1);border:1px solid var(--line2);border-radius:12px;padding:22px 24px;font-family:var(--fm);font-size:12px;line-height:1.75;overflow-x:auto;margin-bottom:20px;counter-reset:lines;position:relative;}
+.cb::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--sa),var(--ad),var(--of));border-radius:12px 12px 0 0;background-size:200% 100%;animation:shimmer 3s linear infinite;}
+.cl{display:block;counter-increment:lines;}
+.cl::before{content:counter(lines);display:inline-block;min-width:28px;color:var(--txt4);user-select:none;margin-right:20px;font-size:10px;text-align:right;}
+.cc{color:#4a6a4a;}.ck{color:#93c5fd;}.cs{color:#fcd34d;}.cv{color:#6ee7b7;}.cf{color:#c4b5fd;}.cw{color:#f87171;}
+
+/* CALLOUTS */
+.cal{border-radius:10px;padding:14px 18px;font-size:13px;line-height:1.65;color:var(--txt2);margin-bottom:20px;display:flex;gap:12px;border:1px solid;}
+.cal-i{font-size:15px;flex-shrink:0;margin-top:1px;}
+.cal-b strong{color:var(--txt);font-weight:600;}
+.ci{background:rgba(58,130,200,.08);border-color:rgba(58,130,200,.25);}
+.cw2{background:rgba(215,150,40,.08);border-color:rgba(215,150,40,.25);}
+.cg{background:rgba(26,158,104,.08);border-color:rgba(26,158,104,.25);}
+.cd{background:rgba(220,80,60,.08);border-color:rgba(220,80,60,.25);}
+
+/* LEGEND */
+.leg{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--txt3);align-items:center;}
+.leg-i{display:flex;align-items:center;gap:7px;}
+
+/* OFFICE USE */
+.og{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+@media(max-width:600px){.og{grid-template-columns:1fr;}}
+.oc{background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .2s var(--ease);}
+.oc:hover{border-color:var(--line2);transform:translateY(-2px);}
+.och{padding:14px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+.oci{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;font-weight:600;}
+.oct{font-weight:500;font-size:14px;color:var(--txt);}
+.ocs{font-size:11px;color:var(--txt3);font-family:var(--fm);}
+.ocb{padding:14px 18px;}
+.ofr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;}
+.ofr:last-child{border-bottom:none;}
+.ofn{color:var(--txt2);}.ofc{font-family:var(--fm);font-size:11px;color:var(--txt3);}
+
+.sf{display:flex;align-items:center;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+.sn2{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:1px solid;}
+.sar{color:var(--txt3);font-size:14px;}
+.sp{background:rgba(215,150,40,.12);color:var(--lim-t);border-color:rgba(215,150,40,.3);}
+.sr{background:rgba(58,130,200,.12);color:var(--ad-t);border-color:rgba(58,130,200,.3);}
+.sa2{background:rgba(26,158,104,.12);color:var(--yes-t);border-color:rgba(26,158,104,.3);}
+.srej{background:rgba(220,80,60,.12);color:var(--no-t);border-color:rgba(220,80,60,.3);}
+
+.cmt{width:100%;font-size:12px;border-collapse:collapse;}
+.cmt th{font-family:var(--fm);font-size:9px;color:var(--txt3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);letter-spacing:.08em;}
+.cmt td{padding:7px 12px;border-bottom:1px solid var(--line);color:var(--txt2);}
+.cmt tr:last-child td{border-bottom:none;}
+.cmt tr:hover td{background:rgba(255,255,255,.02);}
+.cn{font-family:var(--fm);color:var(--sa-t);font-size:11px;}
+.cf2{font-family:var(--fm);color:var(--of-t);font-size:11px;}
+
+/* FOOTER */
+.ftr{background:var(--bg1);border-top:1px solid var(--line);padding:36px 48px;text-align:center;}
+.forg{font-family:var(--fd);font-size:20px;color:var(--txt);margin-bottom:6px;}
+.fsub2{font-family:var(--fm);font-size:10px;color:var(--txt3);letter-spacing:.08em;}
+.fline{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--sa),transparent);margin:14px auto;}
+
+@media print{.nav,.hdr-scan,.hdr-glow,#pc{display:none;}body{background:#fff;color:#000;}.hdr{background:#1a1a1a;}.cb{background:#f5f5f5;border:1px solid #ddd;}}
+</style>
+</head>
+<body>
+
+<canvas id="pc" style="position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;"></canvas>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-grid"></div>
+  <div class="hdr-scan"></div>
+  <div class="hdr-glow"></div>
+  <div class="hdr-inner">
+    <div class="hdr-eye">System Documentation · v4.9</div>
+    <h1 class="hdr-title">Roles &amp; <em>Access</em><br/>Reference Guide</h1>
+    <p class="hdr-sub">Technical reference for the Membership Application Management System — ආදි ශිෂ්‍ය සංගමය.</p>
+    <div class="hdr-meta">
+      <div class="hdr-meta-item"><div class="hdr-meta-lbl">Roles</div><div class="hdr-meta-val">4<span class="cursor"></span></div></div>
+      <div class="hdr-meta-item"><div class="hdr-meta-lbl">Protected pages</div><div class="hdr-meta-val">3</div></div>
+      <div class="hdr-meta-item"><div class="hdr-meta-lbl">Session window</div><div class="hdr-meta-val">30 min</div></div>
+      <div class="hdr-meta-item"><div class="hdr-meta-lbl">Sheet columns</div><div class="hdr-meta-val">37</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-a on" href="#roles">01 Roles</a>
+    <a class="nav-a" href="#pages">02 Pages</a>
+    <a class="nav-a" href="#actions">03 Actions</a>
+    <a class="nav-a" href="#office">04 Office Use</a>
+    <a class="nav-a" href="#session">05 Session</a>
+    <a class="nav-a" href="#technical">06 Technical</a>
+    <a class="nav-a" href="#config">07 Config</a>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- §1 ROLES -->
+<section id="roles">
+  <div class="sh reveal"><span class="sn">01</span><h2 class="st">Role Definitions</h2></div>
+  <div class="rg">
+    <div class="rc sa sel reveal d1" onclick="selR('sa')">
+      <div class="rpill">3 pages</div>
+      <div class="rc-inner">
+        <div class="badge b-sa"><span class="bdot"></span>SuperAdmin</div>
+        <div class="rname">Super admin</div>
+        <div class="rtag">Unrestricted access including permanent record deletion.</div>
+      </div>
+    </div>
+    <div class="rc ad reveal d2" onclick="selR('ad')">
+      <div class="rpill">3 pages</div>
+      <div class="rc-inner">
+        <div class="badge b-ad"><span class="bdot"></span>Admin</div>
+        <div class="rname">Admin</div>
+        <div class="rtag">Full operational access. Cannot delete records.</div>
+      </div>
+    </div>
+    <div class="rc of reveal d3" onclick="selR('of')">
+      <div class="rpill">2 pages</div>
+      <div class="rc-inner">
+        <div class="badge b-of"><span class="bdot"></span>Officer</div>
+        <div class="rname">Officer</div>
+        <div class="rtag">Dashboard and office use only. No payment access.</div>
+      </div>
+    </div>
+    <div class="rc vi reveal d4" onclick="selR('vi')">
+      <div class="rpill">1 page</div>
+      <div class="rc-inner">
+        <div class="badge b-vi"><span class="bdot"></span>Viewer</div>
+        <div class="rname">Viewer</div>
+        <div class="rtag">Read-only visibility into the dashboard only.</div>
+      </div>
+    </div>
+  </div>
+  <div class="dp reveal" id="dp"></div>
+</section>
+
+<!-- §2 PAGES -->
+<section id="pages">
+  <div class="sh reveal"><span class="sn">02</span><h2 class="st">Page Access Matrix</h2></div>
+  <div class="cal ci reveal"><span class="cal-i">ℹ</span><div class="cal-b"><strong>Public routes</strong> — <code>?page=form</code> and <code>?page=login</code> need no auth. All protected routes validate the session token via <code>validateToken()</code> before rendering, then check role-level page access.</div></div>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th style="width:38%">Route / Page</th><th class="c">SuperAdmin</th><th class="c">Admin</th><th class="c">Officer</th><th class="c">Viewer</th></tr></thead>
+      <tbody>
+        <tr><td><div class="tl">Public form</div><div class="ts2">?page=form — no auth</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td></tr>
+        <tr><td><div class="tl">Login</div><div class="ts2">?page=login — public</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td></tr>
+        <tr><td><div class="tl">Dashboard</div><div class="ts2">?page=dashboard — stats &amp; list</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td></tr>
+        <tr><td><div class="tl">Office use</div><div class="ts2">?page=office — edit applications</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Payments</div><div class="ts2">?page=payments — annual dues</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- §3 ACTIONS -->
+<section id="actions">
+  <div class="sh reveal"><span class="sn">03</span><h2 class="st">Action Permissions</h2></div>
+  <div class="leg reveal">
+    <span class="leg-i"><span class="tick ty" style="width:20px;height:20px;font-size:10px;">✓</span>Allowed</span>
+    <span class="leg-i"><span class="tick tn" style="width:20px;height:20px;font-size:10px;">✗</span>Blocked</span>
+    <span class="leg-i"><span class="tick tr2" style="width:20px;height:20px;font-size:10px;">★</span>SuperAdmin exclusive</span>
+  </div>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th style="width:38%">Action / Backend function</th><th class="c">SuperAdmin</th><th class="c">Admin</th><th class="c">Officer</th><th class="c">Viewer</th></tr></thead>
+      <tbody>
+        <tr><td><div class="tl">View applications</div><div class="ts2">getApplications(), getDashboardStats()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td></tr>
+        <tr><td><div class="tl">Edit &amp; save applications</div><div class="ts2">updateOfficeData(), updateStatus()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Approve membership</div><div class="ts2">approveMembership(), setUnderReview()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Reject membership</div><div class="ts2">rejectMembership() — reason required</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Upload payment slips</div><div class="ts2">savePaymentSlipToDrive()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Record payments</div><div class="ts2">recordPayment()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Generate annual dues</div><div class="ts2">generateAnnualDues()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Send payment reminders</div><div class="ts2">sendPaymentReminders()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Export CSV</div><div class="ts2">exportCSV(), exportPaymentsCSV()</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Mark payment status</div><div class="ts2">markPaymentStatus() — Waived / Exempt</div></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick ty">✓</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+        <tr><td><div class="tl">Delete records</div><div class="ts2">deleteApplication() — permanent, no undo</div></td><td class="tc"><span class="tick tr2">★</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td><td class="tc"><span class="tick tn">✗</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tg reveal">
+    <div class="tc2"><div class="tct">CAN_EDIT_ROLES</div><ul class="tli"><li>SuperAdmin, Admin, Officer</li><li>Guards: save, approve, reject, upload</li><li>Check: <code>indexOf(role) !== -1</code></li></ul></div>
+    <div class="tc2"><div class="tct">CAN_MANAGE_ROLES</div><ul class="tli"><li>SuperAdmin, Admin only</li><li>Guards: payments, dues, reminders, export</li><li>Check: <code>indexOf(role) !== -1</code></li></ul></div>
+    <div class="tc2"><div class="tct">CAN_DELETE_ROLES</div><ul class="tli"><li>SuperAdmin only</li><li>Guards: <code>deleteApplication()</code></li><li>Sheet row deleted — no undo</li></ul></div>
+    <div class="tc2"><div class="tct">Public exception</div><ul class="tli"><li><code>saveApplication()</code> — no token</li><li>Called from public form before login</li><li>v4.9 fix: removed stale token param</li></ul></div>
+  </div>
+</section>
+
+<!-- §4 OFFICE USE -->
+<section id="office">
+  <div class="sh reveal"><span class="sn">04</span><h2 class="st">Office Use — Page &amp; Data</h2></div>
+  <div class="cal ci reveal"><span class="cal-i">ℹ</span><div class="cal-b"><strong>Who can access:</strong> SuperAdmin, Admin, Officer. Viewer is blocked. Served via <code>?page=office&amp;ref=REF-YYYY-NNNN</code>. All write ops require <code>CAN_EDIT_ROLES</code> on the backend.</div></div>
+  <p style="font-size:13px;color:var(--txt2);margin-bottom:22px;" class="reveal">The Office Use page is where staff process incoming applications — filling in membership details, recording fees, and moving applications through the status lifecycle.</p>
+
+  <div style="font-family:var(--fm);font-size:10px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;" class="reveal">Status lifecycle</div>
+  <div class="sf reveal">
+    <span class="sn2 sp">Pending</span>
+    <span class="sar">→</span>
+    <span class="sn2 sr">Under Review</span>
+    <span class="sar">→</span>
+    <span class="sn2 sa2">Approved</span>
+    <span class="sar" style="color:var(--txt4);">or</span>
+    <span class="sn2 srej">Rejected</span>
+  </div>
+  <p style="font-size:12px;color:var(--txt3);margin-bottom:32px;font-family:var(--fm);" class="reveal">Rejection requires a mandatory reason string. Approval auto-generates a MEM-YYYY-NNNN number and sends an email to the applicant.</p>
+
+  <div class="og reveal">
+    <div class="oc">
+      <div class="och"><div class="oci" style="background:var(--sa-f);color:var(--sa-t);border:1px solid var(--sa-l);">M</div><div><div class="oct">Membership fields</div><div class="ocs">updateOfficeData() · approveMembership()</div></div></div>
+      <div class="ocb">
+        <div class="ofr"><span class="ofn">Membership number</span><span class="ofc">Col 28</span></div>
+        <div class="ofr"><span class="ofn">Membership type override</span><span class="ofc">Col 3</span></div>
+        <div class="ofr"><span class="ofn">Membership category</span><span class="ofc">Col 29</span></div>
+        <div class="ofr"><span class="ofn">Status</span><span class="ofc">Col 27</span></div>
+        <div class="ofr"><span class="ofn">Approved by</span><span class="ofc">Col 34</span></div>
+        <div class="ofr"><span class="ofn">Approved date</span><span class="ofc">Col 35</span></div>
+      </div>
+    </div>
+    <div class="oc">
+      <div class="och"><div class="oci" style="background:var(--of-f);color:var(--of-t);border:1px solid var(--of-l);">$</div><div><div class="oct">Payment &amp; fee fields</div><div class="ocs">updateOfficeData() · savePaymentSlipToDrive()</div></div></div>
+      <div class="ocb">
+        <div class="ofr"><span class="ofn">Membership fee</span><span class="ofc">Col 30</span></div>
+        <div class="ofr"><span class="ofn">Application fee</span><span class="ofc">Col 31</span></div>
+        <div class="ofr"><span class="ofn">Payment method</span><span class="ofc">Col 32</span></div>
+        <div class="ofr"><span class="ofn">Payment slip file ID</span><span class="ofc">Col 37</span></div>
+        <div class="ofr"><span class="ofn">Office notes</span><span class="ofc">Col 33</span></div>
+        <div class="ofr"><span class="ofn">Rejection reason</span><span class="ofc">Col 36</span></div>
+      </div>
+    </div>
+    <div class="oc">
+      <div class="och"><div class="oci" style="background:var(--ad-f);color:var(--ad-t);border:1px solid var(--ad-l);">✎</div><div><div class="oct">Signature handling</div><div class="ocs">saveSignatureToDrive() · getSignatureBase64()</div></div></div>
+      <div class="ocb">
+        <div class="ofr"><span class="ofn">Signature file ID</span><span class="ofc">Col 26</span></div>
+        <div class="ofr"><span class="ofn">Stored as PNG in Drive</span><span class="ofc">sig_REF.png</span></div>
+        <div class="ofr"><span class="ofn">Public share link</span><span class="ofc">ANYONE_LINK</span></div>
+        <div class="ofr"><span class="ofn">Token required to fetch</span><span class="ofc">checkToken_()</span></div>
+        <div class="ofr"><span class="ofn">Folder</span><span class="ofc">DRIVE_FOLDER_ID</span></div>
+      </div>
+    </div>
+    <div class="oc">
+      <div class="och"><div class="oci" style="background:var(--vi-f);color:var(--vi-t);border:1px solid var(--vi-l);">↓</div><div><div class="oct">PDF / download</div><div class="ocs">generateApplicationPDF() · generateZip()</div></div></div>
+      <div class="ocb">
+        <div class="ofr"><span class="ofn">Single PDF export</span><span class="ofc">CAN_EDIT</span></div>
+        <div class="ofr"><span class="ofn">ZIP of multiple apps</span><span class="ofc">CAN_EDIT</span></div>
+        <div class="ofr"><span class="ofn">Signature embedded</span><span class="ofc">Base64 inline</span></div>
+        <div class="ofr"><span class="ofn">Saved to Drive</span><span class="ofc">temp file</span></div>
+        <div class="ofr"><span class="ofn">Download link returned</span><span class="ofc">getDownloadUrl()</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="font-family:var(--fm);font-size:10px;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;" class="reveal">Full Applications sheet — 37 columns</div>
+  <div class="tw reveal">
+    <table class="cmt">
+      <thead><tr><th>Col</th><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="cn">1</td><td class="cf2">Timestamp</td><td>Submission date/time</td></tr>
+        <tr><td class="cn">2</td><td class="cf2">Reference No</td><td>REF-YYYY-NNNN — auto-generated, locked</td></tr>
+        <tr><td class="cn">3</td><td class="cf2">Membership Type</td><td>samanaya (ordinary) / nawaka (associate)</td></tr>
+        <tr><td class="cn">4</td><td class="cf2">Title</td><td>Mr / Mrs / Dr etc.</td></tr>
+        <tr><td class="cn">5</td><td class="cf2">Name English</td><td>Full name — required field, NIC-duplicate-checked</td></tr>
+        <tr><td class="cn">6</td><td class="cf2">Initials En</td><td>Initials form of name</td></tr>
+        <tr><td class="cn">7</td><td class="cf2">NIC</td><td>National ID — duplicate checked on submit</td></tr>
+        <tr><td class="cn">8</td><td class="cf2">DOB</td><td>Date of birth</td></tr>
+        <tr><td class="cn">9</td><td class="cf2">Mobile Country Code</td><td>e.g. +94</td></tr>
+        <tr><td class="cn">10</td><td class="cf2">Mobile</td><td>Primary phone — required</td></tr>
+        <tr><td class="cn">11</td><td class="cf2">WhatsApp Country Code</td><td>Separate code for WhatsApp number</td></tr>
+        <tr><td class="cn">12</td><td class="cf2">Mobile2 (WhatsApp)</td><td>Secondary / WhatsApp number</td></tr>
+        <tr><td class="cn">13</td><td class="cf2">Email</td><td>Used for confirmation &amp; approval emails</td></tr>
+        <tr><td class="cn">14</td><td class="cf2">Address</td><td>Street address</td></tr>
+        <tr><td class="cn">15</td><td class="cf2">City</td><td>City / town</td></tr>
+        <tr><td class="cn">16</td><td class="cf2">Province</td><td>Province</td></tr>
+        <tr><td class="cn">17</td><td class="cf2">Occupation</td><td>Current job title</td></tr>
+        <tr><td class="cn">18</td><td class="cf2">Workplace</td><td>Employer / institution name</td></tr>
+        <tr><td class="cn">19</td><td class="cf2">Admission Year</td><td>Year first enrolled at school</td></tr>
+        <tr><td class="cn">20</td><td class="cf2">Leaving Year</td><td>Year departed school</td></tr>
+        <tr><td class="cn">21</td><td class="cf2">Grade</td><td>Final grade attended</td></tr>
+        <tr><td class="cn">22</td><td class="cf2">Class</td><td>Class name / section</td></tr>
+        <tr><td class="cn">23</td><td class="cf2">Current Status</td><td>e.g. employed, student</td></tr>
+        <tr><td class="cn">24</td><td class="cf2">Qualifications</td><td>Academic qualifications</td></tr>
+        <tr><td class="cn">25</td><td class="cf2">Skills</td><td>Notable skills / abilities</td></tr>
+        <tr><td class="cn">26</td><td class="cf2">Signature File ID</td><td>Drive file ID of drawn signature PNG</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">27</td><td class="cf2" style="color:var(--lim-t);">Status</td><td>Pending / Under Review / Approved / Rejected</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">28</td><td class="cf2" style="color:var(--lim-t);">Membership Number</td><td>MEM-YYYY-NNNN — assigned on approval</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">29</td><td class="cf2" style="color:var(--lim-t);">Membership Category</td><td>Office-assigned category label</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">30</td><td class="cf2" style="color:var(--lim-t);">Membership Fee</td><td>Amount collected for membership</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">31</td><td class="cf2" style="color:var(--lim-t);">Application Fee</td><td>Separate processing fee</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">32</td><td class="cf2" style="color:var(--lim-t);">Payment Method</td><td>Cash / Bank transfer / Online</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">33</td><td class="cf2" style="color:var(--lim-t);">Office Notes</td><td>Internal staff notes</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">34</td><td class="cf2" style="color:var(--lim-t);">Approved By</td><td>session.username of acting officer</td></tr>
+        <tr><td class="cn" style="color:var(--lim-t);">35</td><td class="cf2" style="color:var(--lim-t);">Approved Date</td><td>Timestamp of approval or rejection</td></tr>
+        <tr><td class="cn" style="color:var(--no-t);">36</td><td class="cf2" style="color:var(--no-t);">Rejection Reason</td><td>Required string when status = Rejected</td></tr>
+        <tr><td class="cn" style="color:var(--no-t);">37</td><td class="cf2" style="color:var(--no-t);">Payment Slip File ID</td><td>Drive file ID of uploaded payment slip</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:var(--txt3);font-family:var(--fm);margin-top:-6px;margin-bottom:0;" class="reveal"><span style="color:var(--lim-t);">■</span> Cols 27–35 office-fill &nbsp;<span style="color:var(--no-t);">■</span> Cols 36–37 rejection &amp; payment slip</p>
+</section>
+
+<!-- §5 SESSION -->
+<section id="session">
+  <div class="sh reveal"><span class="sn">05</span><h2 class="st">Session &amp; Auth Flow</h2></div>
+  <div class="ft reveal">
+    <div class="fn2"><div class="fnum">STEP 01</div><div class="ftitle">Credentials</div><div class="fsub">username + password</div><div class="farr"></div></div>
+    <div class="fn2"><div class="fnum">STEP 02</div><div class="ftitle">Sheet lookup</div><div class="fsub">AdminUsers, Active=true</div><div class="farr"></div></div>
+    <div class="fn2"><div class="fnum">STEP 03</div><div class="ftitle">UUID token</div><div class="fsub">sess_{uuid} stored</div><div class="farr"></div></div>
+    <div class="fn2"><div class="fnum">STEP 04</div><div class="ftitle">Browser store</div><div class="fsub">localStorage client</div><div class="farr"></div></div>
+    <div class="fn2"><div class="fnum">STEP 05</div><div class="ftitle">Per-request check</div><div class="fsub">validateToken() called</div></div>
+  </div>
+  <div class="tg reveal">
+    <div class="tc2"><div class="tct">Session storage engine</div><ul class="tli"><li>Engine: <code>ScriptProperties</code> (Apps Script)</li><li>Key: <code>sess_{uuid}</code></li><li>Value: JSON — username, role, expiry ms</li><li>Max concurrent sessions: 50, auto-cleaned</li></ul></div>
+    <div class="tc2"><div class="tct">Token lifecycle</div><ul class="tli"><li>Duration: 30 min (<code>SESSION_DURATION</code>)</li><li>Sliding window — resets on each valid call</li><li>Logout: <code>logoutUser(token)</code> deletes key</li><li>Cleanup: <code>cleanExpiredSessions_()</code> on login</li></ul></div>
+  </div>
+  <div class="cal cw2 reveal"><span class="cal-i">⚠</span><div class="cal-b"><strong>No top-level PropertiesService calls.</strong> Calling <code>PropertiesService</code> at top level crashes before OAuth completes — <code>validateToken()</code> always fails and pages hang on "Verifying…". All config loads lazily via <code>getConfig_()</code> inside each function.</div></div>
+</section>
+
+<!-- §6 TECHNICAL -->
+<section id="technical">
+  <div class="sh reveal"><span class="sn">06</span><h2 class="st">Technical Reference</h2></div>
+  <div class="cb reveal">
+<span class="cl"><span class="cc">// Standard guard pattern — every protected backend function</span></span>
+<span class="cl"><span class="cw">function</span> <span class="cf">someProtectedFunction</span>(token, data) {</span>
+<span class="cl">  <span class="cf">getConfig_</span>();</span>
+<span class="cl">  <span class="cw">const</span> session = <span class="cf">checkToken_</span>(token);</span>
+<span class="cl">  <span class="cw">if</span> (!session.valid)</span>
+<span class="cl">    <span class="cw">return</span> { success: <span class="cv">false</span>, message: <span class="cs">'Unauthorized'</span> };</span>
+<span class="cl"></span>
+<span class="cl">  <span class="cc">// Tier 1 — edit ops (SuperAdmin, Admin, Officer)</span></span>
+<span class="cl">  <span class="cw">if</span> (CAN_EDIT_ROLES.indexOf(session.role) === -<span class="cv">1</span>)</span>
+<span class="cl">    <span class="cw">return</span> { success: <span class="cv">false</span>, message: <span class="cs">'Permission denied.'</span> };</span>
+<span class="cl"></span>
+<span class="cl">  <span class="cc">// Tier 2 — manage ops (SuperAdmin, Admin)</span></span>
+<span class="cl">  <span class="cw">if</span> (CAN_MANAGE_ROLES.indexOf(session.role) === -<span class="cv">1</span>)</span>
+<span class="cl">    <span class="cw">return</span> { success: <span class="cv">false</span>, message: <span class="cs">'Permission denied.'</span> };</span>
+<span class="cl"></span>
+<span class="cl">  <span class="cc">// Tier 3 — delete only (SuperAdmin)</span></span>
+<span class="cl">  <span class="cw">if</span> (CAN_DELETE_ROLES.indexOf(session.role) === -<span class="cv">1</span>)</span>
+<span class="cl">    <span class="cw">return</span> { success: <span class="cv">false</span>, message: <span class="cs">'Only SuperAdmin can delete.'</span> };</span>
+<span class="cl">}</span>
+  </div>
+  <div class="cb reveal">
+<span class="cl"><span class="cc">// ROLE_PAGE_ACCESS + permission tier arrays</span></span>
+<span class="cl"><span class="cw">const</span> ROLE_PAGE_ACCESS = {</span>
+<span class="cl">  <span class="cs">SuperAdmin</span>: [<span class="cs">'dashboard'</span>, <span class="cs">'office'</span>, <span class="cs">'payments'</span>],</span>
+<span class="cl">  <span class="cs">Admin</span>:      [<span class="cs">'dashboard'</span>, <span class="cs">'office'</span>, <span class="cs">'payments'</span>],</span>
+<span class="cl">  <span class="cs">Officer</span>:    [<span class="cs">'dashboard'</span>, <span class="cs">'office'</span>],</span>
+<span class="cl">  <span class="cs">Viewer</span>:     [<span class="cs">'dashboard'</span>],</span>
+<span class="cl">};</span>
+<span class="cl"><span class="cw">const</span> CAN_EDIT_ROLES   = [<span class="cs">'SuperAdmin'</span>, <span class="cs">'Admin'</span>, <span class="cs">'Officer'</span>];</span>
+<span class="cl"><span class="cw">const</span> CAN_MANAGE_ROLES = [<span class="cs">'SuperAdmin'</span>, <span class="cs">'Admin'</span>];</span>
+<span class="cl"><span class="cw">const</span> CAN_DELETE_ROLES = [<span class="cs">'SuperAdmin'</span>];</span>
+  </div>
+  <div class="cb reveal">
+<span class="cl"><span class="cc">// validateToken() — sliding-window session check</span></span>
+<span class="cl"><span class="cw">function</span> <span class="cf">validateToken</span>(token) {</span>
+<span class="cl">  <span class="cf">getConfig_</span>();</span>
+<span class="cl">  <span class="cw">if</span> (!token || token.trim() === <span class="cs">''</span>) <span class="cw">return</span> { valid: <span class="cv">false</span> };</span>
+<span class="cl">  <span class="cw">const</span> props   = PropertiesService.<span class="cf">getScriptProperties</span>();</span>
+<span class="cl">  <span class="cw">const</span> sessKey = SESS_PREFIX + token.trim();</span>
+<span class="cl">  <span class="cw">const</span> raw     = props.<span class="cf">getProperty</span>(sessKey);</span>
+<span class="cl">  <span class="cw">if</span> (!raw) <span class="cw">return</span> { valid: <span class="cv">false</span> };</span>
+<span class="cl">  <span class="cw">const</span> sess = JSON.<span class="cf">parse</span>(raw);</span>
+<span class="cl">  <span class="cw">if</span> (Date.<span class="cf">now</span>() > sess.expiry) {</span>
+<span class="cl">    props.<span class="cf">deleteProperty</span>(sessKey);</span>
+<span class="cl">    <span class="cw">return</span> { valid: <span class="cv">false</span> };</span>
+<span class="cl">  }</span>
+<span class="cl">  sess.expiry = Date.<span class="cf">now</span>() + CONFIG.SESSION_DURATION; <span class="cc">// reset window</span></span>
+<span class="cl">  props.<span class="cf">setProperty</span>(sessKey, JSON.<span class="cf">stringify</span>(sess));</span>
+<span class="cl">  <span class="cw">return</span> { valid: <span class="cv">true</span>, username: sess.username, role: sess.role };</span>
+<span class="cl">}</span>
+  </div>
+</section>
+
+<!-- §7 CONFIG -->
+<section id="config">
+  <div class="sh reveal"><span class="sn">07</span><h2 class="st">Configuration &amp; Setup</h2></div>
+  <div class="tg reveal">
+    <div class="tc2"><div class="tct">Script Properties required</div><ul class="tli"><li><code>SPREADSHEET_ID</code> — Google Sheets ID</li><li><code>ADMIN_EMAIL</code> — notification recipient</li><li><code>DRIVE_FOLDER_ID</code> — signature file storage</li><li><code>PAYMENT_SLIP_FOLDER_ID</code> — payment slips</li><li><code>LOGO_FILE_ID</code> — org logo in Drive</li></ul></div>
+    <div class="tc2"><div class="tct">Sheets required</div><ul class="tli"><li><code>Applications</code> — 37 columns, main data</li><li><code>AdminUsers</code> — username, password, role, active</li><li><code>AnnualPayments</code> — 12 columns, dues tracking</li><li>Auto-created by <code>setupSystem()</code> if missing</li></ul></div>
+    <div class="tc2"><div class="tct">Setup sequence</div><ul class="tli"><li>Run <code>setupSystem()</code> — creates all sheets</li><li>Run <code>addFirstAdmin()</code> — seeds default account</li><li>Set script properties via the editor UI</li><li>Run <code>checkEmailConfig()</code> to verify email</li><li>Run <code>sendTestEmail()</code> to confirm delivery</li></ul></div>
+    <div class="tc2"><div class="tct">Default seed accounts</div><ul class="tli"><li><code>admin</code> / <code>Admin@1234</code> → SuperAdmin</li><li><code>officer</code> / <code>Officer@1234</code> → Officer</li><li><code>viewer</code> / <code>Viewer@1234</code> → Viewer</li><li>Change all passwords immediately after setup</li></ul></div>
+  </div>
+  <div class="cal cd reveal"><span class="cal-i">⚠</span><div class="cal-b"><strong>Security note:</strong> Default passwords are hardcoded in <code>addRoleAccounts()</code>. Change immediately. AdminUsers sheet stores passwords in plain text — restrict spreadsheet sharing strictly in Google Drive.</div></div>
+  <div class="cal cg reveal"><span class="cal-i">✓</span><div class="cal-b"><strong>v4.9 fix:</strong> <code>saveApplication()</code> corrected from <code>saveApplication(token, formData, sig)</code> to <code>saveApplication(formData, sig)</code>. Old signature caused formData to land in the token slot, making nameEnglish validation always fail with "nameEnglish අවශ්‍යයි".</div></div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="fline"></div>
+  <div class="forg">ආදි ශිෂ්‍ය සංගමය</div>
+  <div class="fsub2">Old Student's Association · K/Siri Saddhathissa Dhamma School · System v4.9</div>
+</footer>
+
+<script>
+/* PARTICLES */
+(function(){
+  const c=document.getElementById('pc'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  const cols=['rgba(123,112,216,','rgba(58,130,200,','rgba(26,158,104,'];
+  for(let i=0;i<55;i++) pts.push({x:Math.random()*3000,y:Math.random()*2000,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.4,col:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*.35+.08});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.col+p.a+')';ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* SCROLL REVEAL */
+const ro=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+/* ROLE DATA */
+const RD={
+  sa:{cls:'sa',icon:'S',name:'SuperAdmin',desc:'Unrestricted — including delete',
+    perms:[{l:'Page access',v:'Dashboard, Office, Payments',t:'yes'},{l:'Edit applications',v:'Yes',t:'yes'},{l:'Manage payments',v:'Yes',t:'yes'},{l:'Approve / reject',v:'Yes',t:'yes'},{l:'Delete records',v:'Yes — exclusive',t:'yes'},{l:'Export CSV',v:'Yes',t:'yes'}],
+    note:'The only role that can permanently delete records. Reserve this for the system owner — use Admin for daily operations.',nt:'nw'},
+  ad:{cls:'ad',icon:'A',name:'Admin',desc:'Full access except delete',
+    perms:[{l:'Page access',v:'Dashboard, Office, Payments',t:'yes'},{l:'Edit applications',v:'Yes',t:'yes'},{l:'Manage payments',v:'Yes',t:'yes'},{l:'Approve / reject',v:'Yes',t:'yes'},{l:'Delete records',v:'No',t:'no'},{l:'Export CSV',v:'Yes',t:'yes'}],
+    note:'Equivalent to SuperAdmin for daily ops. Delete restriction is intentional — data deletion must be a deliberate SuperAdmin act.',nt:'ni'},
+  of:{cls:'of',icon:'O',name:'Officer',desc:'Dashboard + office use only',
+    perms:[{l:'Page access',v:'Dashboard, Office only',t:'lim'},{l:'Edit applications',v:'Yes',t:'yes'},{l:'Manage payments',v:'No',t:'no'},{l:'Approve / reject',v:'Yes',t:'yes'},{l:'Delete records',v:'No',t:'no'},{l:'Export CSV',v:'No',t:'no'}],
+    note:'For front-desk or processing staff. Can update and approve applications but has zero visibility into payments, financials, or exports.',nt:'ni'},
+  vi:{cls:'vi',icon:'V',name:'Viewer',desc:'Read-only — dashboard only',
+    perms:[{l:'Page access',v:'Dashboard only',t:'no'},{l:'Edit applications',v:'No',t:'no'},{l:'Manage payments',v:'No',t:'no'},{l:'Approve / reject',v:'No',t:'no'},{l:'Delete records',v:'No',t:'no'},{l:'Export CSV',v:'No',t:'no'}],
+    note:'For committee members or auditors. Read-only view of application counts and statuses. Cannot change any data.',nt:'ni'}
+};
+
+function selR(k){
+  document.querySelectorAll('.rc').forEach(c=>c.classList.remove('sel'));
+  document.querySelector('.rc.'+k).classList.add('sel');
+  const r=RD[k];
+  const ph=r.perms.map(p=>`<div class="pc"><div class="pl">${p.l}</div><div class="pv ${p.t}"><span class="pdot"></span>${p.v}</div></div>`).join('');
+  const panel=document.getElementById('dp');
+  panel.style.animation='none';panel.offsetHeight;panel.style.animation='popIn .3s var(--ease)';
+  panel.innerHTML=`<div class="dh"><div class="di i-${r.cls}">${r.icon}</div><div><div class="dn">${r.name}</div><div class="dd">${r.desc}</div></div></div><div class="pg">${ph}</div><div class="dnote ${r.nt}">${r.note}</div>`;
+}
+selR('sa');
+
+/* NAV SPY */
+const secs=document.querySelectorAll('section[id]');
+const nls=document.querySelectorAll('.nav-a');
+const nspy=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){nls.forEach(l=>l.classList.remove('on'));const a=document.querySelector('.nav-a[href="#'+e.target.id+'"]');if(a)a.classList.add('on');}});},{rootMargin:'-30% 0px -60% 0px'});
+secs.forEach(s=>nspy.observe(s));
+
+/* ROW HOVER TICK BOUNCE */
+document.querySelectorAll('tr').forEach(row=>{
+  row.addEventListener('mouseenter',()=>{
+    row.querySelectorAll('.tick').forEach(t=>{t.style.transform='scale(1.18)';setTimeout(()=>{t.style.transform='scale(1)';},180);});
+  });
+});
+</script>
+</body>
+</html>
